@@ -106,6 +106,8 @@ int testmotion()
 	//controlSystem::MovePTP(mpos);
 
 	controlSystem::SetFeedSpeed(2);
+
+	motionFunc();
 	//controlSystem::MoveLine(mpos);
 	//rotateCur(20);
 	//controlSystem::MoveArc(mpos, mpos1);
@@ -168,8 +170,7 @@ int main()
 	controlSystem::SetAbsPos(Encvalue0, Ratio, Pitch, Pusle, wAxisMap);
 	controlSystem::GoHome(1);
 
-
-	testmotion();
+	testmotion([](){ rotateCur2(30,30); });
 
 	printEnc();
 	controlSystem::CloseSystem();
