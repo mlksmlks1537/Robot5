@@ -36,7 +36,7 @@ namespace RinnRobotCommander{
             return deg*M_PI/180;
         }
         void SetSpeed(double dx,double dy,double dz,double drx,double dry,double drz){
-            //SetPtPSpeedExÆúÓÃ
+            //SetPtPSpeedExï¿½ï¿½ï¿½ï¿½
             //controlSystem::SetPtPSpeedEx(convexSpeed(dx,0),convexSpeed(dy,1),convexSpeed(dz,2),
             //    convexSpeed(drx,3),convexSpeed(dry,4),convexSpeed(drz,5));
         }
@@ -60,10 +60,17 @@ namespace RinnRobotCommander{
             auto targetLoc = deFlangeLoc(dir,p);
             return getFlangeLoc(newDir,targetLoc);
         }
+        static Eigen::Vector3d rotateRyRz(Eigen::Vector3d dir,Eigen::Vector3d p, double ryDeg,double rzDeg){
+            Eigen::Vector3d newDir = dir;
+            newDir.y() += ryDeg;
+            newDir.z() += rzDeg;
+            auto targetLoc = deFlangeLoc(dir,p);
+            return getFlangeLoc(newDir,targetLoc);
+        }
         static JointPositions newPos(Eigen::Vector3d pos,Eigen::Vector3d dir){
             JointPositions *ret = new JointPositions();
             ret->j1 = pos.x(), ret->j2 = pos.y(), ret->j3 = pos.z();
-            ret->j4 = dir.x(), ret->j5 = dir.y(), ret->j6 = dir.z();
+            ret->j4 = dir.z(), ret->j5 = dir.y(), ret->j6 = dir.x();
             return *ret;
         }
         ~MoveCommander(){

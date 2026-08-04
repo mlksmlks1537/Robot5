@@ -18,7 +18,7 @@ else()
     find_path(EIGEN3_INCLUDE_DIR "Eigen/Dense"
         HINTS
             "$ENV{EIGEN3_DIR}"
-            "C:/Program Files/eigen/include"
+            "C:/Program Files (x86)/eigen-5.0.0"
             "C:/local/include"
             "/usr/include/eigen3"
     )

@@ -73,7 +73,7 @@ bool SavePositionsToTxt(const std::vector<JointPositions>& positions, const std:
 	outFile.close();
 	return true;
 }
-int testmotion()
+int testmotion(std::function<void()> motionFunc)
 {
 	int nRtn;
 	std::vector<JointPositions> positions;
@@ -87,7 +87,9 @@ int testmotion()
 	mpos->j1 = 50, mpos->j2 = 0, mpos->j3 = 0;
 	std::cout << "start motion test..." << std::endl;
 	//motion function
-	//nRtn = controlSystem::SetFeedSpeed(5);
+	
+	nRtn = controlSystem::SetFeedSpeed(5);
+	motionFunc();
 	//nRtn = controlSystem::MoveLine(mpos);
 	//nRtn = controlSystem::MoveArc(mpos, mpos1);
 	//record positions
@@ -144,8 +146,7 @@ int main()
 	//测试
 	controlSystem::InitSystem(Ratio, Pitch, Pusle, HLimit, LLimit, dirReverse, wAxisMap, wAxisMirror);
 	controlSystem::SetAbsPos(Encvalue0, Ratio, Pitch, Pusle, wAxisMap);
-	testmotion();
-	rotateCur(90);
+	testmotion([](){ rotateCur2(30,30); });
 	controlSystem::CloseSystem();
 	return 0;
 }
