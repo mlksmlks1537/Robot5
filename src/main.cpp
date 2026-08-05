@@ -7,6 +7,7 @@
 #include"Robot.h"
 #include"MoveCommander.h"
 #include<vector>
+#include<functional>
 
 void printPos(JointPositions* pos) {
 	if (pos == nullptr) {
@@ -40,7 +41,7 @@ void rotateCur(double deg){
 	JointPositions pos;
 	controlSystem::GetCurJPos(&pos);
 	
-	auto pos1 = RinnRobotCommander::MoveCommander::
+	auto pos1 = RinnRobotCommander::MoveCommander::rotateRy(
 		Eigen::Vector3d(pos.j4, pos.j5, pos.j6), 
 		Eigen::Vector3d(pos.j1, pos.j2, pos.j3), deg/2);
 	auto pos2 = RinnRobotCommander::MoveCommander::
@@ -50,17 +51,65 @@ void rotateCur(double deg){
 	auto pos2_struct = RinnRobotCommander::MoveCommander::newPos(pos2, Eigen::Vector3d(pos.j4, pos.j5 + deg, pos.j6));
 	controlSystem::MoveArc(&pos1_struct, &pos2_struct);
 }
+void gethalfdir(double rz_deg, double ry_deg, double &rrz_deg, double &rry_deg)
+{
+    const double DEG2RAD = M_PI / 180.0;
+    double rz = rz_deg * DEG2RAD;
+    double ry = ry_deg * DEG2RAD;
+
+    double dx = std::cos(rz) * std::cos(ry);
+    double dy = std::sin(rz) * std::cos(ry);
+    double dz = std::sin(ry);
+
+    double ix = 1.0, iy = 0.0, iz = 0.0;
+
+    double mx = ix + dx;
+    double my = iy + dy;
+    double mz = iz + dz;
+
+    double norm = std::sqrt(mx * mx + my * my + mz * mz);
+
+    if (norm < 1e-12) {
+        rrz_deg = 0.0; 
+        rry_deg = 90.0;
+        return;
+    }
+
+    double nx = mx / norm;
+    double ny = my / norm;
+    double nz = mz / norm;
+
+    double ry_new = std::asin((std::max)(-1.0, (std::min)(1.0, nz)));
+    double rz_new = std::atan2(ny, nx);
+	
+    const double RAD2DEG = 180.0 / M_PI;
+    rry_deg = ry_new * RAD2DEG;
+    rrz_deg = rz_new * RAD2DEG;
+}
 void rotateCur2(double dry,double drz){
 	JointPositions pos;
 	controlSystem::GetCurJPos(&pos);
-	
+	pos.j1 = 0, pos.j2 = 0, pos.j3 = 0;
+	pos.j4 = 0, pos.j5 = 0, pos.j6 = 0;
+	std::cout << "Current Joint Positions: "
+		<< "j1: " << pos.j1 << ", "
+		<< "j2: " << pos.j2 << ", "
+		<< "j3: " << pos.j3 << ", "
+		<< "j4: " << pos.j4 << ", "
+		<< "j5: " << pos.j5 << ", "
+		<< "j6: " << pos.j6
+		<< std::endl;
+	double rry_deg, rrz_deg;
+	gethalfdir(drz, dry, rrz_deg, rry_deg);
 	auto pos1 = RinnRobotCommander::MoveCommander::
-		rotateRyRz(Eigen::Vector3d(pos.j4, pos.j5, pos.j6), 
-		Eigen::Vector3d(pos.j1, pos.j2, pos.j3), dry/2, drz/2);
+		rotateRyRz(Eigen::Vector3d(pos.j4, pos.j5, 0), 
+		Eigen::Vector3d(pos.j1, pos.j2, pos.j3), rry_deg, rrz_deg);
 	auto pos2 = RinnRobotCommander::MoveCommander::
-		rotateRyRz(Eigen::Vector3d(pos.j4, pos.j5, pos.j6), 
+		rotateRyRz(Eigen::Vector3d(pos.j4, pos.j5, 0), 
 		Eigen::Vector3d(pos.j1, pos.j2, pos.j3), dry, drz);
-	auto pos1_struct = RinnRobotCommander::MoveCommander::newPos(pos1, Eigen::Vector3d(pos.j4, pos.j5 + dry/2, pos.j6 + drz/2));
+	std::cout << "pos1: " << rry_deg << ", " << pos1.transpose() << std::endl;
+	std::cout << "pos2: " << dry << ", " << drz << ", " << pos2.transpose() << std::endl;
+	auto pos1_struct = RinnRobotCommander::MoveCommander::newPos(pos1, Eigen::Vector3d(pos.j4, pos.j5 + rry_deg, pos.j6 + rrz_deg));
 	auto pos2_struct = RinnRobotCommander::MoveCommander::newPos(pos2, Eigen::Vector3d(pos.j4, pos.j5 + dry, pos.j6 + drz));
 	controlSystem::MoveArc(&pos1_struct, &pos2_struct);
 }
@@ -85,7 +134,7 @@ bool SavePositionsToTxt(const std::vector<JointPositions>& positions, const std:
 	outFile.close();
 	return true;
 }
-int testmotion()
+int testmotion(std::function<void()> motionFunc)
 {
 	int nRtn;
 	std::vector<JointPositions> positions;

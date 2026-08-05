@@ -12,6 +12,7 @@ typedef struct {
 	double j8;
 } JointPositions;
 
+std::ostream& operator<<(std::ostream &os, const JointPositions &pos);
 class controlSystem {
     controlSystem() = delete;
 public:

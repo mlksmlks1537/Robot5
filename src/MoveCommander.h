@@ -20,10 +20,12 @@ namespace RinnRobotCommander{
         static const Eigen::Vector3d moveDir;
         static Eigen::Vector3d getFlangeLoc(Eigen::Vector3d dir, Eigen::Vector3d p,Eigen::Vector3d seenDir = moveDir){
             Eigen::Matrix3d mat = eulerZYXToRotation(dir.x(), dir.y(), dir.z());
+            std::cout<<"get"<<(p+mat*seenDir)<<" with "<<dir.x()<<","<<dir.y()<<","<<dir.z()<<std::endl;
             return p + mat * seenDir;
         }
         static Eigen::Vector3d deFlangeLoc(Eigen::Vector3d dir, Eigen::Vector3d p,Eigen::Vector3d seenDir = moveDir){
             Eigen::Matrix3d mat = eulerZYXToRotation(dir.x(), dir.y(), dir.z());
+            std::cout<<"de"<<(p+mat*-seenDir)<<" with "<<dir.x()<<","<<dir.y()<<","<<dir.z()<<std::endl; 
             return p + mat * -seenDir;
         }
         double tool_Pos[3];
@@ -64,6 +66,7 @@ namespace RinnRobotCommander{
             Eigen::Vector3d newDir = dir;
             newDir.y() += ryDeg;
             newDir.z() += rzDeg;
+            std::cout<<"rotateRyRz "<<dir.transpose()<<" to "<<newDir.transpose()<<std::endl;
             auto targetLoc = deFlangeLoc(dir,p);
             return getFlangeLoc(newDir,targetLoc);
         }

@@ -11,6 +11,17 @@
 #define nGroupIndex 0
 double nInterpolateTime = 1;
 
+std::ostream& operator<<(std::ostream &os, const JointPositions &pos) {
+    return os << "JointPositions(j1: " << pos.j1
+       << ", j2: " << pos.j2
+       << ", j3: " << pos.j3
+       << ", j4: " << pos.j4
+       << ", j5: " << pos.j5
+       << ", j6: " << pos.j6
+       << ", j7: " << pos.j7
+       << ", j8: " << pos.j8
+       << ")";
+}
 int controlSystem::InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[],int wAxisMirror[])
 {
     SYS_MAC_PARAM      stMacParam;
